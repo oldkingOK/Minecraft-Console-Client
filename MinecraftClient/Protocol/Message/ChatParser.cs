@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -206,6 +207,7 @@ namespace MinecraftClient.Protocol.Message
             if (!RulesInitialized)
             {
                 InitRules();
+                InitModRules();
                 RulesInitialized = true;
             }
         }
@@ -321,6 +323,38 @@ namespace MinecraftClient.Protocol.Message
             ConsoleIO.WriteLine(Translations.chat_use_default);
         }
 
+        private static void InitModRules()
+        {
+            // Load forge mod language file
+            if (!Directory.Exists("mods")) return;
+
+            string[] mods = Directory.GetFiles("mods", "*.jar", SearchOption.TopDirectoryOnly);
+            foreach (string mod in mods)
+            {
+                Console.WriteLine("Loading " + mod);
+                ZipArchive jarFile = ZipFile.OpenRead(mod);
+                foreach (ZipArchiveEntry entry in jarFile.Entries)
+                {
+                    if (entry.Name == (Config.Main.Advanced.Language + ".json"))
+                    {
+                        try
+                        {
+                            var lang = JsonSerializer.Deserialize<Dictionary<string, string>>(entry.Open());
+                            if (lang == null) continue;
+                            TranslationRules = TranslationRules.Concat(lang).ToDictionary(v => v.Key, v => v.Value);
+                        }
+                        catch (JsonException)
+                        {
+                        }
+                        catch (ArgumentException)
+                        {
+                        }
+                    }
+                }
+            }
+
+        }
+
         public static string? TranslateString(string rulename)
         {
             if (TranslationRules.TryGetValue(rulename, out string? result))
@@ -341,6 +375,7 @@ namespace MinecraftClient.Protocol.Message
             if (!RulesInitialized)
             {
                 InitRules();
+                InitModRules();
                 RulesInitialized = true;
             }
 
