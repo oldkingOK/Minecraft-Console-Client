@@ -718,7 +718,7 @@ namespace MinecraftClient.Protocol.Handlers
                     if (protocolVersion >= MC_1_19_Version)
                     {
                         log.Debug("Receive DeclareCommands");
-                        DeclareCommands.Read(dataTypes, packetData, protocolVersion);
+                        //DeclareCommands.Read(dataTypes, packetData, protocolVersion);
                         receiveDeclareCommands = true;
                         if (receivePlayerInfo)
                             handler.SetCanSendMessage(true);
