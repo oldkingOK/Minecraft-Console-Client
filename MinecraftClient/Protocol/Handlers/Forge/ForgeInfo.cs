@@ -186,7 +186,12 @@ namespace MinecraftClient.Protocol.Handlers.Forge
                         var isIgnoreServerOnly = (channelSizeAndVersionFlag & VERSION_FLAG_IGNORESERVERONLY) != 0;
                         
                         var modId = dataTypes.ReadNextString(dataPackage);
-                        
+
+                        // This mod needs server and client installed,
+                        // but the `isIgnoreServerOnly` always be true for unknown reason,
+                        // which will affect the left data deserialization and crash the mcc.
+                        if (modId == "firstjoinmessage") isIgnoreServerOnly = false;
+
                         string IGNORESERVERONLY = "IGNORED";
                         var modVersion = isIgnoreServerOnly ? IGNORESERVERONLY : dataTypes.ReadNextString(dataPackage);
                     
